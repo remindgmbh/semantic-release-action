@@ -10,19 +10,20 @@ inputs:
     required: false
     default: "lts/*"
   npm-token:
-    description: NPM access token used by semantic-release, required for type 'npm'
+    description: NPM access token used by semantic-release, required for type 'github-npm' and 'npm-pre'
     required: false
   type:
     description: |
-      Available values are 'default' and 'npm'
-      'default' only creates a release on github while 'npm' additionally publishes an npm package
+      Available values are 'github', 'github-npm' and 'npm-pre'.
+      'github' only creates a release on github while 'github-npm' additionally publishes an npm package.
+      'npm-pre' publishes an npm package appending the current timestamp and the commit SHA to the version.
     required: false
-    default: "default"
+    default: "github"
 
 runs:
   using: composite
   steps:
-    - if: ${{ !contains(fromJSON('["default", "npm"]'), inputs.type) || !inputs.github-token || inputs.type == 'npm' && !inputs.npm-token }}
+    - if: ${{ !contains(fromJSON('["github", "github-npm", "npm-pre"]'), inputs.type) }}
       shell: bash
       run: echo "Invalid inputs" && exit 1
     - uses: actions/checkout@v4
@@ -33,11 +34,8 @@ runs:
         node-version: ${{ inputs.node-version }}
     - shell: bash
       run: npm --prefix ${{ github.action_path }} ci
-    - if: ${{ inputs.type == 'npm' }}
-      shell: bash
-      run: npm ci
     - shell: bash
-      run: npm exec --prefix ${{ github.action_path }} semantic-release -- --extends ${{ github.action_path }}/.releaserc.branches.json --extends ${{ github.action_path }}/.releaserc.${{ inputs.type }}.json
+      run: npm exec --prefix ${{ github.action_path }} semantic-release -- --extends ${{ github.action_path }}/release.${{ inputs.type }}.cjs
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }}
         NPM_TOKEN: ${{ inputs.npm-token }}

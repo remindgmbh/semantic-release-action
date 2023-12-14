@@ -17,7 +17,7 @@ module.exports = {
         [
             "@semantic-release/exec",
             {
-                prepareCmd: "npm version --no-git-tag-version ${nextRelease.version}-${nextRelease.channel ?? 'dev'}-${Date.now()}-${nextRelease.gitHead}",
+                prepareCmd: "npm version --no-git-tag-version ${nextRelease.version}-${Date.now()}-${process.env.GITHUB_SHA_SHORT}",
             }
         ]
     ],

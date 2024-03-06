@@ -10,7 +10,9 @@ module.exports = {
         [
             "@semantic-release/exec",
             {
-                prepareCmd: "npm ci"
+                prepareCmd: "npm ci",
+                // semantic-release always creates a tag, so it will be deleted in case of fail
+                failCmd: "git push origin :refs/tags/${nextRelease.gitTag}",
             }
         ],
         "@semantic-release/npm",
@@ -20,7 +22,6 @@ module.exports = {
                 prepareCmd: "npm version --no-git-tag-version ${nextRelease.version}-${nextRelease.channel ?? process.env.GITHUB_REF_NAME}-${Date.now()}-${process.env.GITHUB_SHA_SHORT}",
                 // semantic-release always creates a tag, so it will be deleted afterwards
                 successCmd: "git push origin :refs/tags/${nextRelease.gitTag}",
-                failCmd: "git push origin :refs/tags/${nextRelease.gitTag}"
             }
         ]
     ],
